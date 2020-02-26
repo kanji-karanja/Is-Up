@@ -29,8 +29,8 @@ foreach ($jsonIterator as $key => $val) {
                 $payload = file_get_contents($requrl . "sendMessage?chat_id=" . $user . "&text=" . $htmlcode . "&parse_mode=HTML");
             }
             else{
-                $url = $payload;
-                urlExists($payload);
+                $url = $val;
+                urlExists($val);
             }
         }
     }

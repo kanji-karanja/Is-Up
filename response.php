@@ -12,11 +12,22 @@ if(isset($_GET["url"])){
 function urlExists($urlpassed=NULL){  
     if($urlpassed == NULL) return false;  
     $ch = curl_init($urlpassed);  
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 5);  
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);  
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  
+    // curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    // curl_setopt($ch, CURLOPT_TIMEOUT, 5);  
+    // curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);  
+    // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  
+    curl_setopt_array($ch, array(
+        CURLOPT_URL => $urlpassed,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "GET",
+      ));
+      
     $response = curl_exec($ch);
     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
     $message =getStatus($httpcode);

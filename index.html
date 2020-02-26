@@ -145,7 +145,7 @@
         xmlhttp.send();
         }
         else{
-          document.getElementById("status").innerHTML ="<div class='card'><div class='card-body'><strong class='text-danger'>The URL is invalid</strong></div></div>";
+          document.getElementById("status").innerHTML ="<div class='card'><div class='card-body'><strong class='text-danger'>The URL is invalid, but heck! We will check it out so please wait :) </strong></div></div>";
           let xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {

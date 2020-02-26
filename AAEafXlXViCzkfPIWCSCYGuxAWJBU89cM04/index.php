@@ -42,6 +42,8 @@ function urlExists($requrl,$user,$urlpassed=NULL){
     $ch = curl_init($urlpassed);  
     curl_setopt_array($ch, array(
         CURLOPT_URL => $urlpassed,
+        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_SSL_VERIFYPEER=> false,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => "",
         CURLOPT_MAXREDIRS => 10,

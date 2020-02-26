@@ -12,13 +12,15 @@ if(isset($_GET["url"])){
 function urlExists($urlpassed=NULL){  
     if($urlpassed == NULL) return false;  
     $ch = curl_init($urlpassed);  
-    // curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-    // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    //curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     // curl_setopt($ch, CURLOPT_TIMEOUT, 5);  
     // curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);  
     // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  
     curl_setopt_array($ch, array(
         CURLOPT_URL => $urlpassed,
+        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_SSL_VERIFYPEER=> false,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => "",
         CURLOPT_MAXREDIRS => 10,

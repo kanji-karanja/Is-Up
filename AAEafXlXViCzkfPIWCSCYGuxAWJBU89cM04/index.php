@@ -30,14 +30,14 @@ foreach ($jsonIterator as $key => $val) {
             }
             else{
                 $url = $val;
-                urlExists($val);
+                urlExists($requrl,$user,$val);
             }
         }
     }
 }
 
 
-function urlExists($urlpassed=NULL){  
+function urlExists($requrl,$user,$urlpassed=NULL){  
     if($urlpassed == NULL) return false;  
     $ch = curl_init($urlpassed);  
     curl_setopt_array($ch, array(
@@ -100,12 +100,10 @@ function getStatus($httpcode){
     return $message;
 }
 function compose($requrl,$user,$title,$url,$httpcode,$message){
-    $htmlcode = urlencode( $title.'\n<i>'.$url.'</i>\nThe server Responded with the following status code:\n
-    Status Code | Meaning \n'.$httpcode.' | '.$message);
+    $htmlcode = urlencode( $title."\n\n<i>".$url."</i>\nThe server Responded with the following status code:\n\nStatus Code | Meaning \n".$httpcode." | ".$message);
     $payload = file_get_contents($requrl . "sendMessage?chat_id=" . $user . "&text=" . $htmlcode . "&parse_mode=HTML");
 }    
 function error($requrl,$user,$url){
-    $htmlcode = urlencode('<b>❌ The server is unreachable and could not be reached</b>\n
-       <i>'.$url.'</i>\nThe server is down and may not exist or is experiencing some error.');
+    $htmlcode = urlencode("<b>❌ The server is unreachable and could not be reached</b>\n\n<i>".$url."</i>\n\nThe server is down and may not exist or is experiencing some error.");
        $payload = file_get_contents($requrl . "sendMessage?chat_id=" . $user . "&text=" . $htmlcode . "&parse_mode=HTML");
 }    

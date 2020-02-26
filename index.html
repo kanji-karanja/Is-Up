@@ -146,6 +146,18 @@
         }
         else{
           document.getElementById("status").innerHTML ="<div class='card'><div class='card-body'><strong class='text-danger'>The URL is invalid</strong></div></div>";
+          let xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("status").innerHTML = this.responseText;
+                if(!isChecked){
+                    timer();
+                    isChecked=true;
+                }
+            }
+        };
+        xmlhttp.open("GET", "response.php?url=" + url, true);
+        xmlhttp.send();
         }
     }
     const timer=()=>{

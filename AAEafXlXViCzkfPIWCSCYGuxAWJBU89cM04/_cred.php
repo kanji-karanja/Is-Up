@@ -11,7 +11,7 @@ if($_SERVER['HTTP_HOST']==='localhost'){
     $conn = new mysqli('localhost','root','','isup');
 }
 else if($_SERVER['HTTP_HOST']==='is-up.cryosoft.co.ke'){
-    $conn = new mysqli('den1.mysql3.gear.host', 'portalmsu', 'Dp1z?1-yE2zP', 'isup');
+    $conn = new mysqli('den1.mysql3.gear.host', 'isup', 'Dp1z?1-yE2zP', 'isup');
 }
 else{
     $conn = new mysqli('localhost','root','','isup');

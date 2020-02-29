@@ -8,14 +8,14 @@ $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
-    urlExists($row[url_got],$row[user_id]);
+    urlExists($row['url_got'],$row['user_id'],$requrl);
     }
     
 } else {
     // Do nothing since there is no site added
 }
 $conn->close();
-function urlExists($urlpassed=NULL,$adminid){  
+function urlExists($urlpassed=NULL,$adminid,$requrl){  
     if($urlpassed == NULL) return false;  
     $ch = curl_init($urlpassed);  
     curl_setopt_array($ch, array(
@@ -37,8 +37,7 @@ function urlExists($urlpassed=NULL,$adminid){
    curl_close($ch);
    if ($response){
    if($httpcode>=200 && $httpcode<300){  
-    $color="success";
-    $title = "<i class='fa fa-check-circle'></i>&nbsp;The server is running well and is up."; compose($color,$title,$urlpassed,$httpcode,$message);
+    //do nothing
     }
     else if($httpcode>=300 && $httpcode<400){  
         //do nothing
@@ -48,12 +47,12 @@ function urlExists($urlpassed=NULL,$adminid){
     else { 
         $title = "❌ The server has encountered an error"; 
         $htmlcode = urlencode( $title."\n\n<i>".$urlpassed."</i>\nThe server Responded with the following status code:\n\nStatus Code | Meaning \n".$httpcode." | ".$message);
-        $payload = file_get_contents($requrl+"sendMessage?chat_id=" . $adminid . "&text=" . $htmlcode . "&parse_mode=HTML");
+        $payload = file_get_contents($requrl."sendMessage?chat_id=" . $adminid . "&text=" . $htmlcode . "&parse_mode=HTML");
     }  
     }
     else{
-        $htmlcode = urlencode("<b>❌ The server is unreachable and could not be reached</b>\n\n<i>".$url."</i>\n\nThe server is down and may not exist or is experiencing some error.");
-        $payload = file_get_contents($requrl+"sendMessage?chat_id=" . $adminid . "&text=" . $htmlcode . "&parse_mode=HTML");
+        $htmlcode = urlencode("<b>❌ The server is unreachable and could not be reached</b>\n\n<i>".$urlpassed."</i>\n\nThe server is down and may not exist or is experiencing some error.");
+        $payload = file_get_contents($requrl."sendMessage?chat_id=" . $adminid . "&text=" . $htmlcode . "&parse_mode=HTML");
     }
 }  
 function getStatus($httpcode){

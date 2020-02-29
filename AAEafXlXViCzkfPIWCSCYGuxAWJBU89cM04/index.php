@@ -1,4 +1,5 @@
 <?php
+require '_cred.php';
 $message="";
 $httpcode="";
 $title = "";
@@ -9,6 +10,8 @@ $jsonIterator = new RecursiveIteratorIterator(
     new RecursiveArrayIterator(json_decode($request, TRUE)),
     RecursiveIteratorIterator::SELF_FIRST);
 $user=0;
+$update = json_decode($request, true);
+if (isset($update['message'])) {
 foreach ($jsonIterator as $key => $val) {
     if (is_array($val)) {
         echo "$key:\n";
@@ -25,20 +28,117 @@ foreach ($jsonIterator as $key => $val) {
         }
         if ($key === 'text') {
             if ($val === '/start') {
-                $htmlcode = urlencode('<b>To check if a site is up send me a URL.</b>');
-                $payload = file_get_contents($requrl . "sendMessage?chat_id=" . $user . "&text=" . $htmlcode . "&parse_mode=HTML");
+                $htmlcode = urlencode("<b>To check if a site is up send me a URL or <b>to set a url send me a url to get regular updates in the following format:</b>\n\n/seturl https://example.com.</b>");
+                    compose($requrl,$user,$htmlcode); 
+            }
+            else if($val==='/geturls'){
+                $htmlcode = urlencode("⏱ <b>Getting your URLS...</b>\n\n Please wait...");
+                compose($requrl,$user,$htmlcode); 
+                $sql = "SELECT url_got FROM managers WHERE user_id='$user'";
+                    $result = $conn->query($sql);
+
+                    if ($result->num_rows > 0) {
+                        // output data of each row
+                        $listing = 1 ;
+                        $htmlcode = "You have set the following URL(s):\n\n";
+                        while($row = $result->fetch_assoc()) {
+                            $htmlcode .= $listing.". ".$row['url_got']."\n";
+                            $listing++;
+                        }
+                        $htmlcode = urlencode($htmlcode);
+                    } else {
+                        $htmlcode = urlencode("❌ <b>You have not set any URLs to receive updates for.</b>");
+                    }
+                    updateMessage($requrl,$user,$htmlcode,$message_id);
+            }
+            else if($val==='/stopurl'){
+                $htmlcode = urlencode("⏱ <b>Getting your URLS...</b>\n\n Please wait...");
+                compose($requrl,$user,$htmlcode); 
+                $sql = "SELECT url_got,id FROM managers WHERE user_id='$user'";
+                    $result = $conn->query($sql);
+
+                    if ($result->num_rows > 0) {
+                        // output data of each row
+                        $htmlcode = "You have set the following URL(s):\n\n";
+                        $db_urls = array();
+                        while($row = $result->fetch_assoc()) {
+                            $inline_array = array(array('text'=>$row['url_got'],'callback_data'=>$row['id']));
+                            array_push($db_urls,$inline_array);
+                             }
+                        $htmlcode = urlencode("<b>Click on any of the urls you have set to remove it</b>");
+                        $inlineKeyboardMarkup = array(
+                          'inline_keyboard' => $db_urls
+                        );
+                $reply_markup = json_encode($inlineKeyboardMarkup);
+                    } else {
+                        $htmlcode = urlencode("❌ <b>You have not set any URLs to receive updates for.</b>");
+                    }
+                    updateMessage($requrl,$user,$htmlcode,$message_id,$reply_markup);
+            }
+            else if(substr($val, 0, 7)==='/seturl'){
+                if(substr($val, 7)===""){
+                    $htmlcode = urlencode("<b>To set a url to get regular updates, send me a url in the following format:</b>\n\n/seturl https://example.com");
+                        compose($requrl,$user,$htmlcode); 
+                }
+                else{
+                    $test_url =substr($val, 7);
+                    $htmlcode = urlencode("<b>Setting the following URL</b>\n".substr($val, 7));
+                        $payload = file_get_contents($requrl . "sendMessage?chat_id=" . $user . "&text=" . $htmlcode . "&parse_mode=HTML");
+                        // prepare and bind
+                        $sql = "SELECT * FROM managers WHERE user_id='$user' AND url_got='$test_url'";
+                    $result = $conn->query($sql);
+
+                    if ($result->num_rows > 0) {
+                        // output data of each row
+                        $htmlcode = urlencode("⚠ The URL <b>".substr($val, 7)."</b> already exists. No change has been done");
+                        updateMessage($requrl,$user,$htmlcode,$message_id);
+                    } else {
+                        $stmt = $conn->prepare("INSERT INTO managers (url_got, user_id) VALUES (?, ?)");
+                        $stmt->bind_param("ss", $url, $user_id);
+
+                        // set parameters and execute
+                        $user_id=$user;
+                        $url = substr($val, 7);
+                        if($stmt->execute()){
+                            $htmlcode = urlencode("⭐💫The URL <b>".substr($val, 7)."</b> has been successfully set.\nYou will receive updates on Downtime");
+                            updateMessage($requrl,$user,$htmlcode,$message_id);
+                        }
+                        else{
+                            $htmlcode = urlencode("❌The URL <b>".substr($val, 7)."</b> couldn't be set!");
+                        $payload = file_get_contents($requrl . "sendMessage?chat_id=" . $user . "&text=" . $htmlcode . "&parse_mode=HTML");
+                        }
+                        $stmt->close();
+                    }
+                }
             }
             else{
                 $url = $val;
-                urlExists($requrl,$user,$val);
+                urlExists($requrl,$user,$val,$message_id);
             }
         }
+    
     }
+}
+}
+else if (isset($update['callback_query'] )) {
+        $userId = $update["callback_query"]["from"]["id"];
+        $idofrecord = $update["callback_query"]["data"];
+        $message_id = $update["callback_query"]["message"]["message_id"];
+        $sql ="DELETE FROM managers WHERE id='$idofrecord' AND user_id='$userId'";
+        if ($conn->query($sql) === TRUE) {
+            $htmlcode= urlencode("The URL has been removed and stopped successfully!");
+            updateMessage($requrl,$userId,$htmlcode,($message_id-1));
+        } else {
+            $htmlcode= urlencode("The URL could not be removed. Please try again later!");
+            updateMessage($requrl,$userId,$htmlcode,($message_id-1));
+        }
 }
 
 
-function urlExists($requrl,$user,$urlpassed=NULL){  
-    if($urlpassed == NULL) return false;  
+function urlExists($requrl,$user,$urlpassed=NULL,$message_id){
+    if($urlpassed == NULL) return false; 
+    $htmlcode = urlencode("⏱ Please wait...\n Getting status of ".$urlpassed); 
+    compose($requrl,$user,$htmlcode); 
     $ch = curl_init($urlpassed);  
     curl_setopt_array($ch, array(
         CURLOPT_URL => $urlpassed,
@@ -59,20 +159,23 @@ function urlExists($requrl,$user,$urlpassed=NULL){
    curl_close($ch);
    if ($response){
    if($httpcode>=200 && $httpcode<300){  
-    $color="success";
-    $title = "✅ The server is running well and is up."; compose($requrl,$user,$title,$urlpassed,$httpcode,$message);
-    }else if($httpcode>=300 && $httpcode<400){  
-        $title = "⚠ The server is up. Some additional action needs to be taken."; compose($requrl,$user,$title,$urlpassed,$httpcode,$message); 
-        } else if($httpcode>=400 && $httpcode<500){  
-
-            $title = "⚠ The server is up however there is a client error."; compose($requrl,$user,$title,$urlpassed,$httpcode,$message);
+    $title = "✅ The server is running well and is up.";
+    }
+    else if($httpcode>=300 && $httpcode<400){  
+        $title = "⚠ The server is up. Some additional action needs to be taken."; 
+        } 
+    else if($httpcode>=400 && $httpcode<500){  
+            $title = "⚠ The server is up however there is a client error."; 
             }
     else { 
-        $title = "❌ The server has encountered an error"; compose($requrl,$user,$title,$urlpassed,$httpcode,$message);
+        $title = "❌ The server has encountered an error"; 
     }  
+    $htmlcode = urlencode( $title."\n\n<i>".$urlpassed."</i>\nThe server Responded with the following status code:\n\nStatus Code | Meaning \n".$httpcode." | ".$message);
+    updateMessage($requrl,$user,$htmlcode,$message_id);
     }
     else{
-        error($requrl,$user,$urlpassed);
+        $htmlcode = urlencode("<b>❌ The server is unreachable and could not be reached</b>\n<i>".$url."</i>\n\nThe server is down and may not exist or is experiencing some error.");
+        updateMessage($requrl,$user,$htmlcode,$message_id);
     }
 }  
 function getStatus($httpcode){
@@ -101,11 +204,14 @@ function getStatus($httpcode){
     }
     return $message;
 }
-function compose($requrl,$user,$title,$url,$httpcode,$message){
-    $htmlcode = urlencode( $title."\n\n<i>".$url."</i>\nThe server Responded with the following status code:\n\nStatus Code | Meaning \n".$httpcode." | ".$message);
-    $payload = file_get_contents($requrl . "sendMessage?chat_id=" . $user . "&text=" . $htmlcode . "&parse_mode=HTML");
-}    
-function error($requrl,$user,$url){
-    $htmlcode = urlencode("<b>❌ The server is unreachable and could not be reached</b>\n\n<i>".$url."</i>\n\nThe server is down and may not exist or is experiencing some error.");
-       $payload = file_get_contents($requrl . "sendMessage?chat_id=" . $user . "&text=" . $htmlcode . "&parse_mode=HTML");
-}    
+function compose($requrl,$user,$htmlcode){
+    $payload = file_get_contents($requrl . "sendMessage?chat_id=" . $user . "&text=" . $htmlcode . "&parse_mode=HTML&disable_web_page_preview=true");
+} 
+function updateMessage($requrl,$user,$htmlcode,$message_id,$replymarkup=null){
+    if($replymarkup!=null){
+        $payload = file_get_contents($requrl . "editMessageText?chat_id=" . $user . "&message_id=".($message_id+1)."&text=" . $htmlcode . "&parse_mode=HTML&disable_web_page_preview=true&reply_markup=".$replymarkup);
+    }
+    else{
+    $payload = file_get_contents($requrl . "editMessageText?chat_id=" . $user . "&message_id=".($message_id+1)."&text=" . $htmlcode . "&parse_mode=HTML&disable_web_page_preview=true");
+    }
+}     

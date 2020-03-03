@@ -33,11 +33,9 @@ function urlExists($urlpassed=NULL,$adminid,$requrl){
       ));
       
     $response = curl_exec($ch);
+   if ($response){
     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
     $message =getStatus($httpcode);
-    echo $httpcode." : ".$urlpassed;
-   curl_close($ch);
-   if ($response){
    if($httpcode>=200 && $httpcode<300){  
     //do nothing
     }
@@ -48,14 +46,15 @@ function urlExists($urlpassed=NULL,$adminid,$requrl){
             }
     else { 
         $title = "❌ The server has encountered an error"; 
-    } 
-    $htmlcode = urlencode( $title."\n\n<i>".$urlpassed."</i>\nThe server Responded with the following status code:\n\nStatus Code | Meaning \n".$httpcode." | ".$message);
+        $htmlcode = urlencode( $title."\n\n<i>".$urlpassed."</i>\nThe server Responded with the following status code:\n\nStatus Code | Meaning \n".$httpcode." | ".$message);
         $payload = file_get_contents($requrl."sendMessage?chat_id=" . $adminid . "&text=" . $htmlcode . "&parse_mode=HTML"); 
+    } 
     }
     else{
-        $htmlcode = urlencode("<b>❌ The server is unreachable and could not be reached</b>\n\n<i>".$urlpassed."</i>\n\nThe server is down and may not exist or is experiencing some error.");
+        $htmlcode = urlencode("<b>❌ The server is unreachable and could not be accessed!</b>\n\n<i>".$urlpassed."</i>\n\nThe server is down and may not exist or is experiencing some error.");
         $payload = file_get_contents($requrl."sendMessage?chat_id=" . $adminid . "&text=" . $htmlcode . "&parse_mode=HTML");
     }
+    curl_close($ch);
 }
 }  
 function getStatus($httpcode){

@@ -47,9 +47,9 @@ function urlExists($urlpassed=NULL,$adminid,$requrl){
             }
     else { 
         $title = "❌ The server has encountered an error"; 
-        $htmlcode = urlencode( $title."\n\n<i>".$urlpassed."</i>\nThe server Responded with the following status code:\n\nStatus Code | Meaning \n".$httpcode." | ".$message);
-        $payload = file_get_contents($requrl."sendMessage?chat_id=" . $adminid . "&text=" . $htmlcode . "&parse_mode=HTML");
-    }  
+    } 
+    $htmlcode = urlencode( $title."\n\n<i>".$urlpassed."</i>\nThe server Responded with the following status code:\n\nStatus Code | Meaning \n".$httpcode." | ".$message);
+        $payload = file_get_contents($requrl."sendMessage?chat_id=" . $adminid . "&text=" . $htmlcode . "&parse_mode=HTML"); 
     }
     else{
         $htmlcode = urlencode("<b>❌ The server is unreachable and could not be reached</b>\n\n<i>".$urlpassed."</i>\n\nThe server is down and may not exist or is experiencing some error.");

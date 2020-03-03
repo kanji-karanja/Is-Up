@@ -75,8 +75,8 @@ foreach ($jsonIterator as $key => $val) {
                     }
                     updateMessage($requrl,$user,$htmlcode,$message_id,$reply_markup);
             }
-            else if(substr($val.trim(), 0, 7)==='/seturl'){
-                if(substr($val.trim(), 7)===""||substr($val.trim(), 7)===" "){
+            else if(substr($val.trim(), 0, 7)=='/seturl'){
+                if(substr($val.trim(), 7)==""||substr($val.trim(), 7)==" "){
                     $htmlcode = urlencode("<b>To set a url to get regular updates, send me a url in the following format:</b>\n\n/seturl https://example.com");
                         compose($requrl,$user,$htmlcode); 
                 }

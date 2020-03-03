@@ -35,6 +35,7 @@ function urlExists($urlpassed=NULL,$adminid,$requrl){
     $response = curl_exec($ch);
     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
     $message =getStatus($httpcode);
+    echo $httpcode." : ".$urlpassed;
    curl_close($ch);
    if ($response){
    if($httpcode>=200 && $httpcode<300){  

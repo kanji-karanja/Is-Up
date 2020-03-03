@@ -75,13 +75,13 @@ foreach ($jsonIterator as $key => $val) {
                     }
                     updateMessage($requrl,$user,$htmlcode,$message_id,$reply_markup);
             }
-            else if(substr($val, 0, 7)==='/seturl'){
-                if(substr($val, 7)===""){
+            else if(substr($val.trim(), 0, 7)==='/seturl'){
+                if(substr($val.trim(), 7)===""){
                     $htmlcode = urlencode("<b>To set a url to get regular updates, send me a url in the following format:</b>\n\n/seturl https://example.com");
                         compose($requrl,$user,$htmlcode); 
                 }
                 else{
-                    $test_url =substr($val, 7);
+                    $test_url =substr($val.trim(), 7);
                     $htmlcode = urlencode("<b>Setting the following URL</b>\n".substr($val, 7));
                         $payload = file_get_contents($requrl . "sendMessage?chat_id=" . $user . "&text=" . $htmlcode . "&parse_mode=HTML");
                         // prepare and bind

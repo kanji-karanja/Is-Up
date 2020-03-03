@@ -16,7 +16,8 @@ if ($result->num_rows > 0) {
 }
 $conn->close();
 function urlExists($urlpassed=NULL,$adminid,$requrl){  
-    if($urlpassed == NULL) return false;  
+    if($urlpassed == NULL) return false; 
+    else{
     $ch = curl_init($urlpassed);  
     curl_setopt_array($ch, array(
         CURLOPT_URL => $urlpassed,
@@ -54,6 +55,7 @@ function urlExists($urlpassed=NULL,$adminid,$requrl){
         $htmlcode = urlencode("<b>❌ The server is unreachable and could not be reached</b>\n\n<i>".$urlpassed."</i>\n\nThe server is down and may not exist or is experiencing some error.");
         $payload = file_get_contents($requrl."sendMessage?chat_id=" . $adminid . "&text=" . $htmlcode . "&parse_mode=HTML");
     }
+}
 }  
 function getStatus($httpcode){
   

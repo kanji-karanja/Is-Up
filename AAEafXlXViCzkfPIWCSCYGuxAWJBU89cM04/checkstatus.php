@@ -8,7 +8,7 @@ $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
-      $urlpassed =   $row['url_got'];
+      $urlpassed = $row['url_got'];
       $adminid = $row['user_id'];
     $ch = curl_init($urlpassed);  
     curl_setopt_array($ch, array(

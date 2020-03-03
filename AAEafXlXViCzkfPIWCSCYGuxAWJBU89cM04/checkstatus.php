@@ -8,18 +8,11 @@ $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
-    urlExists($row['url_got'],$row['user_id'],$requrl);
-    }
-    
-} else {
-    // Do nothing since there is no site added
-}
-$conn->close();
-function urlExists($urlpassed=NULL,$adminid,$requrl){  
-    if($urlpassed == NULL) return false; 
-    else{
+      $urlpassed =   $row['url_got'];
+      $adminid = $row['user_id'];
     $ch = curl_init($urlpassed);  
     curl_setopt_array($ch, array(
+        CURLOPT_VERBOSE=> true,
         CURLOPT_URL => $urlpassed,
         CURLOPT_SSL_VERIFYHOST => false,
         CURLOPT_SSL_VERIFYPEER=> false,
@@ -36,6 +29,7 @@ function urlExists($urlpassed=NULL,$adminid,$requrl){
    if ($response){
     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
     $message =getStatus($httpcode);
+    echo $httpcode." : ".$urlpassed;
    if($httpcode>=200 && $httpcode<300){  
     //do nothing
     }
@@ -55,8 +49,11 @@ function urlExists($urlpassed=NULL,$adminid,$requrl){
         $payload = file_get_contents($requrl."sendMessage?chat_id=" . $adminid . "&text=" . $htmlcode . "&parse_mode=HTML");
     }
     curl_close($ch);
+    }
+    
+} else {
+    // Do nothing since there is no site added
 }
-}  
 function getStatus($httpcode){
   
     switch($httpcode){

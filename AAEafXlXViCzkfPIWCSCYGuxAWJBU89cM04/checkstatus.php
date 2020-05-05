@@ -29,7 +29,7 @@ if ($result->num_rows > 0) {
    if ($response){
     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
     $message =getStatus($httpcode);
-    echo $httpcode." : ".$urlpassed;
+    //echo $httpcode." : ".$urlpassed;
    if($httpcode>=200 && $httpcode<300){  
     //do nothing
     }
@@ -82,3 +82,5 @@ function getStatus($httpcode){
     }
     return $message;
 }
+
+echo "All commands were executed successfully";

@@ -3,17 +3,15 @@ require '_cred.php';
 $requrl ="https://api.telegram.org/bot1063299581:AAEafXlXViCzkfPIWCSCYGuxAWJBU89cM04/";
 $sql = "SELECT * FROM managers";
 $result = mysqli_query($conn, $sql);
-
 $result = $conn->query($sql);
-
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
-      $urlpassed = $row['url_got'];
-      $adminid = $row['user_id'];
+      $urlpassed = trim($row["url_got"]);
+      $adminid = $row["user_id"];
     $ch = curl_init($urlpassed);  
     curl_setopt_array($ch, array(
-        CURLOPT_VERBOSE=> true,
         CURLOPT_URL => $urlpassed,
+        CURLOPT_VERBOSE=> true,
         CURLOPT_SSL_VERIFYHOST => false,
         CURLOPT_SSL_VERIFYPEER=> false,
         CURLOPT_RETURNTRANSFER => true,
@@ -26,6 +24,8 @@ if ($result->num_rows > 0) {
       ));
       
     $response = curl_exec($ch);
+    //echo curl_error($ch);
+    //echo $response;
    if ($response){
     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
     $message =getStatus($httpcode);
@@ -39,12 +39,14 @@ if ($result->num_rows > 0) {
             //do nothing
             }
     else { 
+        //echo $message;
         $title = "❌ The server has encountered an error"; 
         $htmlcode = urlencode( $title."\n\n<i>".$urlpassed."</i>\nThe server Responded with the following status code:\n\nStatus Code | Meaning \n".$httpcode." | ".$message);
         $payload = file_get_contents($requrl."sendMessage?chat_id=" . $adminid . "&text=" . $htmlcode . "&parse_mode=HTML"); 
     } 
     }
     else{
+        //echo $message;
         $htmlcode = urlencode("<b>❌ The server is unreachable and could not be accessed!</b>\n\n<i>".$urlpassed."</i>\n\nThe server is down and may not exist or is experiencing some error.");
         $payload = file_get_contents($requrl."sendMessage?chat_id=" . $adminid . "&text=" . $htmlcode . "&parse_mode=HTML");
     }

@@ -11,6 +11,7 @@ if(isset($_GET["url"])){
 
 function urlExists($urlpassed=NULL){  
     if($urlpassed == NULL) return false;  
+    $urlpassed = trim($urlpassed);
     $ch = curl_init($urlpassed);  
     //curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
